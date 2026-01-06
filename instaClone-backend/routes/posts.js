@@ -90,18 +90,14 @@ router.get('/feed', auth, async (req, res) => {
         .populate('comments.user', 'username profilePic');
     }
 
-    // Get saved posts for current user
-    const savedPostIds = (currentUser.savedPosts || []).map(id => id.toString());
-
-    // Add liked and saved status for current user
+    // Add liked status for current user
     const postsWithLikeStatus = posts.map(post => {
       const postObj = post.toObject ? post.toObject() : post;
       return {
         ...postObj,
         likesCount: postObj.likes?.length || 0,
         commentsCount: postObj.comments?.length || 0,
-        isLiked: postObj.likes?.some(like => like.equals ? like.equals(req.user._id) : like.toString() === req.user._id.toString()) || false,
-        isSaved: savedPostIds.includes(postObj._id.toString())
+        isLiked: postObj.likes?.some(like => like.equals ? like.equals(req.user._id) : like.toString() === req.user._id.toString()) || false
       };
     });
 

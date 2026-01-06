@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../store/slices/authSlice'
 import { ROUTES } from '../../config/constants'
+import DefaultAvatar from '../common/DefaultAvatar'
 
 const Sidebar = ({ onCreatePost }) => {
   const dispatch = useDispatch()
@@ -26,11 +27,20 @@ const Sidebar = ({ onCreatePost }) => {
       ),
     },
     {
+      path: ROUTES.SEARCH,
+      label: 'Search',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      ),
+    },
+    {
       path: ROUTES.EXPLORE,
       label: 'Explore',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       ),
     },
@@ -120,9 +130,7 @@ const Sidebar = ({ onCreatePost }) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-xs text-gray-600">
-              {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
+            <DefaultAvatar username={user?.username} size="xs" />
           )}
         </div>
         <span>Profile</span>

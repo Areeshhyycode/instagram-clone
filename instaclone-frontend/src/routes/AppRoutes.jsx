@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Login, Signup, Home } from '../pages'
 import Profile from '../pages/Profile'
 import Explore from '../pages/Explore'
+import Search from '../pages/Search'
 import Notifications from '../pages/Notifications'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
@@ -21,6 +22,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.HOME} element={<Home />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path={ROUTES.EXPLORE} element={<Explore />} />
+        <Route path={ROUTES.SEARCH} element={<Search />} />
         <Route path={ROUTES.NOTIFICATIONS} element={<Notifications />} />
       </Route>
 

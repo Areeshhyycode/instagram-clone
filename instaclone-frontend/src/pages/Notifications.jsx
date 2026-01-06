@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Sidebar from '../components/layout/Sidebar'
+import DefaultAvatar from '../components/common/DefaultAvatar'
 import {
   fetchNotificationsStart,
   fetchNotificationsSuccess,
@@ -148,17 +149,15 @@ const Notifications = () => {
                     to={`/profile/${notification.sender?.username}`}
                     className="flex-shrink-0"
                   >
-                    <div className="w-11 h-11 rounded-full bg-gray-200 overflow-hidden">
-                      {notification.sender?.profilePic ? (
+                    <div className="w-11 h-11 rounded-full overflow-hidden">
+                      {notification.sender?.profilePic && notification.sender.profilePic.startsWith('/uploads/') ? (
                         <img
                           src={`http://localhost:8000${notification.sender.profilePic}`}
                           alt={notification.sender.username}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-400">
-                          {notification.sender?.username?.charAt(0)?.toUpperCase()}
-                        </div>
+                        <DefaultAvatar username={notification.sender?.username} size="lg" />
                       )}
                     </div>
                   </Link>

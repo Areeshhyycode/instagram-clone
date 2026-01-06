@@ -10,6 +10,7 @@ import {
   unfollowUserSuccess,
 } from '../../store/slices/userSlice'
 import userService from '../../services/userService'
+import DefaultAvatar from '../common/DefaultAvatar'
 
 const FollowersModal = ({ isOpen, onClose, userId, type, title }) => {
   const dispatch = useDispatch()
@@ -116,17 +117,15 @@ const FollowersModal = ({ isOpen, onClose, userId, type, title }) => {
                     onClick={onClose}
                     className="flex items-center gap-3 flex-1"
                   >
-                    <div className="w-11 h-11 rounded-full bg-gray-200 overflow-hidden">
-                      {user.profilePic ? (
+                    <div className="w-11 h-11 rounded-full overflow-hidden">
+                      {user.profilePic && user.profilePic.startsWith('/uploads/') ? (
                         <img
                           src={`http://localhost:8000${user.profilePic}`}
                           alt={user.username}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray-400">
-                          {user.username?.charAt(0)?.toUpperCase()}
-                        </div>
+                        <DefaultAvatar username={user.username} size="lg" />
                       )}
                     </div>
                     <div>

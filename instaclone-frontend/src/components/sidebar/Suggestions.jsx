@@ -8,6 +8,7 @@ import {
 } from '../../store/slices/userSlice'
 import userService from '../../services/userService'
 import { ROUTES } from '../../config/constants'
+import DefaultAvatar from '../common/DefaultAvatar'
 
 const Suggestions = () => {
   const dispatch = useDispatch()
@@ -54,17 +55,15 @@ const Suggestions = () => {
       {/* Current user */}
       <div className="flex items-center justify-between mb-5">
         <Link to={`/profile/${user?.username}`} className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-gray-200 overflow-hidden">
-            {user?.profilePic ? (
+          <div className="w-11 h-11 rounded-full overflow-hidden">
+            {user?.profilePic && user.profilePic.startsWith('/uploads/') ? (
               <img
                 src={`http://localhost:8000${user.profilePic}`}
                 alt={user?.username}
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-lg font-semibold text-gray-500">
-                {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
+              <DefaultAvatar username={user?.username} size="lg" />
             )}
           </div>
           <div>
@@ -104,17 +103,15 @@ const Suggestions = () => {
           suggestedUsers.map((suggestion) => (
             <div key={suggestion._id} className="flex items-center justify-between">
               <Link to={`/profile/${suggestion.username}`} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
-                  {suggestion.profilePic ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden">
+                  {suggestion.profilePic && suggestion.profilePic.startsWith('/uploads/') ? (
                     <img
                       src={`http://localhost:8000${suggestion.profilePic}`}
                       alt={suggestion.username}
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-400">
-                      {suggestion.username?.charAt(0)?.toUpperCase()}
-                    </div>
+                    <DefaultAvatar username={suggestion.username} size="sm" />
                   )}
                 </div>
                 <div>

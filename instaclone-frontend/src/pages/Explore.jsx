@@ -20,7 +20,6 @@ const Explore = () => {
 
   useEffect(() => {
     fetchExplorePosts()
-    fetchTrendingHashtags()
   }, [activeTab])
 
   const fetchExplorePosts = async () => {
@@ -93,36 +92,28 @@ const Explore = () => {
 
       <main className="ml-[245px]">
         <div className="max-w-[935px] mx-auto px-5 py-8">
-          {/* Search Bar */}
-          <div className="mb-6">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Search posts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pl-10 bg-gray-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-gray-300"
-              />
-              <svg
-                className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </form>
+          {/* Tabs */}
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => setActiveTab('trending')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                activeTab === 'trending'
+                  ? 'bg-black text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              Trending
+            </button>
+            <button
+              onClick={() => setActiveTab('random')}
+              className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                activeTab === 'random'
+                  ? 'bg-black text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              Discover
+            </button>
           </div>
 
           {/* Trending Hashtags */}
@@ -144,31 +135,6 @@ const Explore = () => {
             </div>
           )}
 
-          {/* Tabs (only when not searching) */}
-          {!searchResults.length && (
-            <div className="flex gap-4 mb-6">
-              <button
-                onClick={() => setActiveTab('trending')}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-                  activeTab === 'trending'
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-              >
-                Trending
-              </button>
-              <button
-                onClick={() => setActiveTab('random')}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-                  activeTab === 'random'
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-              >
-                Discover
-              </button>
-            </div>
-          )}
 
           {/* Search Results Header */}
           {hasSearchResults && (

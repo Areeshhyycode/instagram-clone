@@ -7,6 +7,7 @@ import {
   markStoryViewed,
 } from '../../store/slices/storySlice'
 import storyService from '../../services/storyService'
+import DefaultAvatar from '../common/DefaultAvatar'
 
 const StoryViewer = ({ userStories, onClose, onNextUser, onPrevUser }) => {
   const dispatch = useDispatch()
@@ -145,17 +146,15 @@ const StoryViewer = ({ userStories, onClose, onNextUser, onPrevUser }) => {
 
         {/* Header */}
         <div className="absolute top-6 left-4 right-4 z-10 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden">
-            {user?.profilePic ? (
+          <div className="w-8 h-8 rounded-full overflow-hidden">
+            {user?.profilePic && user.profilePic.startsWith('/uploads/') ? (
               <img
                 src={`http://localhost:8000${user.profilePic}`}
                 alt={user.username}
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-xs font-semibold">
-                {user?.username?.charAt(0)?.toUpperCase()}
-              </div>
+              <DefaultAvatar username={user?.username} size="sm" />
             )}
           </div>
           <span className="text-white font-semibold text-sm">{user?.username}</span>

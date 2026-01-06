@@ -5,6 +5,7 @@ import Sidebar from '../components/layout/Sidebar'
 import CreatePostModal from '../components/post/CreatePostModal'
 import EditProfileModal from '../components/profile/EditProfileModal'
 import FollowersModal from '../components/profile/FollowersModal'
+import DefaultAvatar from '../components/common/DefaultAvatar'
 import {
   fetchProfileStart,
   fetchProfileSuccess,
@@ -140,16 +141,14 @@ const Profile = () => {
             <div className="flex-shrink-0">
               <div className="w-[150px] h-[150px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[3px]">
                 <div className="w-full h-full rounded-full bg-white p-[3px]">
-                  {profile.profilePic ? (
+                  {profile.profilePic && profile.profilePic.startsWith('/uploads/') ? (
                     <img
                       src={`http://localhost:8000${profile.profilePic}`}
                       alt={profile.username}
                       className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-5xl font-semibold text-gray-400">
-                      {profile.username?.charAt(0)?.toUpperCase()}
-                    </div>
+                    <DefaultAvatar username={profile.username || username} size="profile" />
                   )}
                 </div>
               </div>

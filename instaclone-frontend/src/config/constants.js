@@ -10,6 +10,7 @@ export const ROUTES = {
   SIGNUP: '/signup',
   PROFILE: '/profile',
   EXPLORE: '/explore',
+  SEARCH: '/search',
   MESSAGES: '/messages',
   NOTIFICATIONS: '/notifications',
 }

@@ -9,6 +9,7 @@ import {
 import storyService from '../../services/storyService'
 import StoryViewer from './StoryViewer'
 import CreateStoryModal from './CreateStoryModal'
+import DefaultAvatar from '../common/DefaultAvatar'
 
 const Stories = () => {
   const dispatch = useDispatch()
@@ -83,16 +84,14 @@ const Stories = () => {
             }`}>
               <div className="w-full h-full rounded-full bg-white p-[2px]">
                 <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center relative overflow-hidden">
-                  {user?.profilePic ? (
+                  {user?.profilePic && user.profilePic.startsWith('/uploads/') ? (
                     <img
                       src={`http://localhost:8000${user.profilePic}`}
                       alt="Your story"
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-xl font-semibold text-gray-400">
-                      {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
+                    <DefaultAvatar username={user?.username} size="story" />
                   )}
                   {/* Add story button */}
                   {!myStoriesInFeed && (
@@ -122,19 +121,15 @@ const Stories = () => {
                     ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600'
                     : 'bg-gray-300'
                 }`}>
-                  <div className="w-full h-full rounded-full bg-white p-[2px]">
-                    {userStories.user.profilePic ? (
+                  <div className="w-full h-full rounded-full bg-white p-[2px] overflow-hidden">
+                    {userStories.user.profilePic && userStories.user.profilePic.startsWith('/uploads/') ? (
                       <img
                         src={`http://localhost:8000${userStories.user.profilePic}`}
                         alt={userStories.user.username}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-xl font-semibold text-gray-400">
-                          {userStories.user.username?.charAt(0)?.toUpperCase()}
-                        </span>
-                      </div>
+                      <DefaultAvatar username={userStories.user.username} size="story" />
                     )}
                   </div>
                 </div>

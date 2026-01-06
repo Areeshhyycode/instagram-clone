@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { toggleLike, addComment, toggleSave } from '../../store/slices/postSlice'
+import { toggleLike, addComment, toggleSave, deletePost } from '../../store/slices/postSlice'
 import postService from '../../services/postService'
 import { formatDistanceToNow } from '../../utils/dateUtils'
+import DefaultAvatar from '../common/DefaultAvatar'
 
 const PostCard = ({ post }) => {
   const dispatch = useDispatch()
@@ -13,6 +14,23 @@ const PostCard = ({ post }) => {
   const [isCommenting, setIsCommenting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showAllComments, setShowAllComments] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const menuRef = useRef(null)
+
+  // Check if current user owns this post
+  const isOwner = user?._id === post.user?._id
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Check if current user liked this post (use backend isLiked if available, otherwise check manually)
   const isLiked = post.isLiked !== undefined
@@ -55,6 +73,23 @@ const PostCard = ({ post }) => {
     }
   }
 
+  const handleDelete = async () => {
+    if (isDeleting) return
+    if (!window.confirm('Are you sure you want to delete this post?')) return
+
+    setIsDeleting(true)
+    setShowMenu(false)
+    try {
+      await postService.deletePost(post._id)
+      dispatch(deletePost(post._id))
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Failed to delete post')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const handleComment = async (e) => {
     e.preventDefault()
     if (!commentText.trim() || isCommenting) return
@@ -88,16 +123,14 @@ const PostCard = ({ post }) => {
         >
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-pink-600 p-[2px]">
             <div className="w-full h-full rounded-full bg-white p-[2px]">
-              {post.user?.profilePic ? (
+              {post.user?.profilePicture ? (
                 <img
                   src={`http://localhost:8000${post.user.profilePic}`}
                   alt={post.user.username}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold">
-                  {post.user?.username?.charAt(0)?.toUpperCase()}
-                </div>
+                <DefaultAvatar username={post.user?.username} size="sm" />
               )}
             </div>
           </div>
@@ -105,13 +138,39 @@ const PostCard = ({ post }) => {
         </Link>
 
         {/* More options */}
-        <button className="p-2">
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="6" r="2" />
-            <circle cx="12" cy="12" r="2" />
-            <circle cx="12" cy="18" r="2" />
-          </svg>
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button
+            className="p-2"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="6" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="12" cy="18" r="2" />
+            </svg>
+          </button>
+
+          {/* Dropdown Menu */}
+          {showMenu && (
+            <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[150px]">
+              {isOwner && (
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="w-full px-4 py-3 text-left text-red-500 font-semibold hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
+              )}
+              <button
+                onClick={() => setShowMenu(false)}
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 border-t border-gray-200"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Image */}
