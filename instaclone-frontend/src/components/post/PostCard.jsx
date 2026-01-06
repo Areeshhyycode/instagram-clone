@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { toggleLike, addComment } from '../../store/slices/postSlice'
+import { toggleLike, addComment, toggleSave } from '../../store/slices/postSlice'
 import postService from '../../services/postService'
 import { formatDistanceToNow } from '../../utils/dateUtils'
 
@@ -11,12 +11,16 @@ const PostCard = ({ post }) => {
   const [commentText, setCommentText] = useState('')
   const [isLiking, setIsLiking] = useState(false)
   const [isCommenting, setIsCommenting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [showAllComments, setShowAllComments] = useState(false)
 
   // Check if current user liked this post
   const isLiked = post.likes?.some(
     (like) => like === user?._id || like._id === user?._id
   )
+
+  // Check if current user saved this post
+  const isSaved = post.isSaved || false
 
   const handleLike = async () => {
     if (isLiking) return
@@ -32,6 +36,22 @@ const PostCard = ({ post }) => {
       console.error('Like error:', error)
     } finally {
       setIsLiking(false)
+    }
+  }
+
+  const handleSave = async () => {
+    if (isSaving) return
+    setIsSaving(true)
+    try {
+      const response = await postService.toggleSavePost(post._id)
+      dispatch(toggleSave({
+        postId: post._id,
+        saved: response.saved,
+      }))
+    } catch (error) {
+      console.error('Save error:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -137,10 +157,16 @@ const PostCard = ({ post }) => {
           </div>
 
           {/* Save button */}
-          <button>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
+          <button onClick={handleSave} disabled={isSaving}>
+            {isSaved ? (
+              <svg className="w-6 h-6 text-black fill-current" viewBox="0 0 24 24">
+                <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            )}
           </button>
         </div>
 

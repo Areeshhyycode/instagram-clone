@@ -56,6 +56,15 @@ const postSlice = createSlice({
       }
     },
 
+    // Save/Unsave post (bookmark)
+    toggleSave: (state, action) => {
+      const { postId, saved } = action.payload
+      const post = state.posts.find(p => p._id === postId)
+      if (post) {
+        post.isSaved = saved
+      }
+    },
+
     // Add comment
     addComment: (state, action) => {
       const { postId, comment } = action.payload
@@ -95,6 +104,7 @@ export const {
   loadMorePostsSuccess,
   fetchPostsFailure,
   toggleLike,
+  toggleSave,
   addComment,
   addPost,
   deletePost,
