@@ -14,10 +14,10 @@ const PostCard = ({ post }) => {
   const [isSaving, setIsSaving] = useState(false)
   const [showAllComments, setShowAllComments] = useState(false)
 
-  // Check if current user liked this post
-  const isLiked = post.likes?.some(
-    (like) => like === user?._id || like._id === user?._id
-  )
+  // Check if current user liked this post (use backend isLiked if available, otherwise check manually)
+  const isLiked = post.isLiked !== undefined
+    ? post.isLiked
+    : post.likes?.some((like) => like === user?._id || like._id === user?._id || like.toString?.() === user?._id)
 
   // Check if current user saved this post
   const isSaved = post.isSaved || false
@@ -88,9 +88,9 @@ const PostCard = ({ post }) => {
         >
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-pink-600 p-[2px]">
             <div className="w-full h-full rounded-full bg-white p-[2px]">
-              {post.user?.profilePicture ? (
+              {post.user?.profilePic ? (
                 <img
-                  src={post.user.profilePicture}
+                  src={`http://localhost:8000${post.user.profilePic}`}
                   alt={post.user.username}
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -172,7 +172,7 @@ const PostCard = ({ post }) => {
 
         {/* Likes count */}
         <p className="font-semibold text-sm mb-1">
-          {post.likes?.length || 0} likes
+          {post.likesCount ?? post.likes?.length ?? 0} likes
         </p>
 
         {/* Caption */}

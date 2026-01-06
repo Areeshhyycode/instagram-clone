@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { updateUser } from '../../store/slices/authSlice'
 import { updateProfileSuccess } from '../../store/slices/userSlice'
 import userService from '../../services/userService'
 
 const EditProfileModal = ({ isOpen, onClose, profile, onUpdate }) => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
   const [formData, setFormData] = useState({
@@ -59,10 +61,14 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdate }) => {
       // Update profile state
       dispatch(updateProfileSuccess(updatedProfile))
 
-      // Refresh profile
-      if (onUpdate) onUpdate()
-
       onClose()
+
+      // If username changed, navigate to new profile URL
+      if (formData.username !== profile.username) {
+        navigate(`/profile/${updatedProfile.username}`, { replace: true })
+      } else if (onUpdate) {
+        onUpdate()
+      }
     } catch (err) {
       setError(err.message || 'Failed to update profile')
     } finally {

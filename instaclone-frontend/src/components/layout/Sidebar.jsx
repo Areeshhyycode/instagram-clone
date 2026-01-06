@@ -113,9 +113,9 @@ const Sidebar = ({ onCreatePost }) => {
         }
       >
         <div className="w-6 h-6 rounded-full bg-gray-300 overflow-hidden">
-          {user?.profilePicture ? (
+          {user?.profilePic ? (
             <img
-              src={user.profilePicture}
+              src={user.profilePic.startsWith('http') ? user.profilePic : `http://localhost:8000${user.profilePic}`}
               alt={user.username}
               className="w-full h-full object-cover"
             />

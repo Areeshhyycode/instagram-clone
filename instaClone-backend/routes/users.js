@@ -20,25 +20,33 @@ router.get('/profile/username/:username', auth, async (req, res) => {
     // Get posts count
     const postsCount = await Post.countDocuments({ user: user._id });
 
-    // Check if current user is following this user
-    const isFollowing = user.followers.some(
-      follower => follower.equals(req.user._id)
+    // Check if current user is following this user (with null safety)
+    const followers = user.followers || [];
+    const isFollowing = followers.some(
+      follower => follower && follower.equals && follower.equals(req.user._id)
     );
+
+    // Safe length checks
+    const followersCount = followers.length;
+    const followingCount = (user.following || []).length;
 
     res.json({
       _id: user._id,
       username: user.username,
       profilePic: user.profilePic,
       bio: user.bio,
+      fullName: user.fullName || '',
+      website: user.website || '',
       postsCount,
-      followersCount: user.followers.length,
-      followingCount: user.following.length,
+      followersCount,
+      followingCount,
       isFollowing,
       isOwnProfile: user._id.equals(req.user._id),
       createdAt: user.createdAt
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Profile fetch error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -62,12 +70,16 @@ router.get('/posts/:username', auth, async (req, res) => {
       .populate('user', 'username profilePic')
       .populate('comments.user', 'username profilePic');
 
-    // Add liked status for current user
+    // Add liked and saved status for current user
+    const currentUser = await User.findById(req.user._id);
+    const savedPostIds = (currentUser?.savedPosts || []).map(id => id.toString());
+
     const postsWithLikeStatus = posts.map(post => ({
       ...post.toObject(),
-      likesCount: post.likes.length,
-      commentsCount: post.comments.length,
-      isLiked: post.likes.some(like => like.equals(req.user._id))
+      likesCount: (post.likes || []).length,
+      commentsCount: (post.comments || []).length,
+      isLiked: (post.likes || []).some(like => like && like.equals && like.equals(req.user._id)),
+      isSaved: savedPostIds.includes(post._id.toString())
     }));
 
     const total = await Post.countDocuments({ user: user._id });
@@ -79,7 +91,8 @@ router.get('/posts/:username', auth, async (req, res) => {
       totalPosts: total
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Posts fetch error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
