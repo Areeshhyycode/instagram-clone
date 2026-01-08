@@ -114,7 +114,7 @@ const PostCard = ({ post }) => {
     : post.comments?.slice(-2)
 
   return (
-    <article className="bg-white border border-[#DBDBDB] rounded-lg mb-4">
+    <article className="bg-white border-0 md:border border-[#DBDBDB] rounded-none md:rounded-lg mb-0 md:mb-4">
       {/* Header */}
       <header className="flex items-center justify-between p-3">
         <Link

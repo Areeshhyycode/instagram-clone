@@ -25,7 +25,7 @@ const Suggestions = () => {
     dispatch(fetchSuggestedStart())
     try {
       const response = await userService.getSuggestedUsers(5)
-      dispatch(fetchSuggestedSuccess(response))
+      dispatch(fetchSuggestedSuccess(response.users || []))
     } catch (error) {
       // If backend route doesn't exist yet, use empty array
       console.log('Suggested users not available yet:', error.message)
@@ -79,7 +79,7 @@ const Suggestions = () => {
       {/* Suggestions header */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-500">Suggested for you</span>
-        <Link to={ROUTES?.EXPLORE || '/explore'} className="text-xs font-semibold">
+        <Link to="/suggested-users" className="text-xs font-semibold">
           See All
         </Link>
       </div>

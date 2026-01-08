@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
+import MobileBottomNav from '../components/layout/MobileBottomNav'
 import CreatePostModal from '../components/post/CreatePostModal'
 import postService from '../services/postService'
 import userService from '../services/userService'
@@ -87,11 +88,12 @@ const Explore = () => {
   const hasSearchResults = searchResults.length > 0 || userResults.length > 0
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] pb-[50px] md:pb-0 pt-[50px] md:pt-0">
       <Sidebar onCreatePost={() => setShowCreatePost(true)} />
+      <MobileBottomNav onCreatePost={() => setShowCreatePost(true)} />
 
-      <main className="ml-[245px]">
-        <div className="max-w-[935px] mx-auto px-5 py-8">
+      <main className="md:ml-[245px]">
+        <div className="max-w-[935px] mx-auto px-4 md:px-5 py-4 md:py-8">
           {/* Tabs */}
           <div className="flex gap-4 mb-6">
             <button
@@ -256,11 +258,11 @@ const Explore = () => {
                   <p className="text-gray-500">Try searching for something else.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-1">
+                <div className="grid grid-cols-3 gap-0.5 md:gap-1">
                   {displayPosts.map((post) => (
                     <Link
                       key={post._id}
-                      to={`/p/${post._id}`}
+                      to={`/profile/${post.user?.username || post.user}`}
                       className="aspect-square bg-gray-100 relative group"
                     >
                       <img
