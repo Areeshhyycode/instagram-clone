@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Sidebar from '../components/layout/Sidebar'
+import MobileBottomNav from '../components/layout/MobileBottomNav'
 import Stories from '../components/stories/Stories'
 import PostCard from '../components/post/PostCard'
 import Suggestions from '../components/sidebar/Suggestions'
@@ -32,15 +33,18 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] pb-[50px] md:pb-0 pt-[50px] md:pt-0">
       {/* Sidebar */}
       <Sidebar onCreatePost={() => setShowCreatePost(true)} />
 
+      {/* Mobile Navigation */}
+      <MobileBottomNav onCreatePost={() => setShowCreatePost(true)} />
+
       {/* Main Content */}
-      <main className="ml-[245px] flex justify-center">
-        <div className="flex gap-8 pt-8 px-4">
+      <main className="md:ml-[245px] flex justify-center">
+        <div className="flex flex-col md:flex-row gap-0 md:gap-8 pt-0 md:pt-8 px-0 md:px-4 w-full md:w-auto">
           {/* Feed */}
-          <div className="w-[470px]">
+          <div className="w-full md:w-[470px]">
             {/* Stories */}
             <Stories />
 
@@ -117,8 +121,10 @@ const Home = () => {
             )}
           </div>
 
-          {/* Right Sidebar - Suggestions */}
-          <Suggestions />
+          {/* Right Sidebar - Suggestions (Hidden on mobile) */}
+          <div className="hidden lg:block">
+            <Suggestions />
+          </div>
         </div>
       </main>
 

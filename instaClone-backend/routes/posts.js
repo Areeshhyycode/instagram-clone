@@ -23,7 +23,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
     await post.save();
     
     // Populate user details
-    await post.populate('user', 'username profilePicture');
+    await post.populate('user', 'username profilePic');
     
     res.status(201).json(post);
   } catch (error) {
@@ -196,7 +196,7 @@ router.post('/comment/:id', auth, async (req, res) => {
 
     // Populate the newly added comment's user details
     const populatedPost = await Post.findById(post._id)
-      .populate('comments.user', 'username profilePicture');
+      .populate('comments.user', 'username profilePic');
 
     const newComment = populatedPost.comments[populatedPost.comments.length - 1];
 
@@ -427,8 +427,8 @@ router.get('/trending-hashtags', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('user', 'username profilePicture')
-      .populate('comments.user', 'username profilePicture');
+      .populate('user', 'username profilePic')
+      .populate('comments.user', 'username profilePic');
 
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });

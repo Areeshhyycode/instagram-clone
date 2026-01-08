@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Sidebar from '../components/layout/Sidebar'
+import MobileBottomNav from '../components/layout/MobileBottomNav'
 import DefaultAvatar from '../components/common/DefaultAvatar'
 import {
   fetchNotificationsStart,
@@ -89,11 +90,12 @@ const Notifications = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] pb-[50px] md:pb-0 pt-[50px] md:pt-0">
       <Sidebar />
+      <MobileBottomNav />
 
-      <main className="ml-[245px]">
-        <div className="max-w-[600px] mx-auto px-5 py-8">
+      <main className="md:ml-[245px]">
+        <div className="max-w-[600px] mx-auto px-4 md:px-5 py-4 md:py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold">Notifications</h1>

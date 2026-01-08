@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Sidebar from '../components/layout/Sidebar'
+import MobileBottomNav from '../components/layout/MobileBottomNav'
 import CreatePostModal from '../components/post/CreatePostModal'
 import EditProfileModal from '../components/profile/EditProfileModal'
 import FollowersModal from '../components/profile/FollowersModal'
@@ -106,9 +107,10 @@ const Profile = () => {
 
   if (profileLoading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA]">
+      <div className="min-h-screen bg-[#FAFAFA] pb-[50px] md:pb-0 pt-[50px] md:pt-0">
         <Sidebar onCreatePost={() => setShowCreatePost(true)} />
-        <main className="ml-[245px] flex justify-center items-center h-screen">
+        <MobileBottomNav onCreatePost={() => setShowCreatePost(true)} />
+        <main className="md:ml-[245px] flex justify-center items-center h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </main>
       </div>
@@ -117,9 +119,10 @@ const Profile = () => {
 
   if (profileError || !profile) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA]">
+      <div className="min-h-screen bg-[#FAFAFA] pb-[50px] md:pb-0 pt-[50px] md:pt-0">
         <Sidebar onCreatePost={() => setShowCreatePost(true)} />
-        <main className="ml-[245px] flex justify-center items-center h-screen">
+        <MobileBottomNav onCreatePost={() => setShowCreatePost(true)} />
+        <main className="md:ml-[245px] flex justify-center items-center h-screen">
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-2">User not found</h2>
             <p className="text-gray-500">The user you're looking for doesn't exist.</p>
@@ -130,16 +133,17 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FAFAFA] pb-[50px] md:pb-0 pt-[50px] md:pt-0">
       <Sidebar onCreatePost={() => setShowCreatePost(true)} />
+      <MobileBottomNav onCreatePost={() => setShowCreatePost(true)} />
 
-      <main className="ml-[245px]">
-        <div className="max-w-[935px] mx-auto px-5 py-8">
+      <main className="md:ml-[245px]">
+        <div className="max-w-[935px] mx-auto px-4 md:px-5 py-4 md:py-8">
           {/* Profile Header */}
-          <header className="flex gap-8 md:gap-20 mb-10 flex-col md:flex-row items-center md:items-start">
+          <header className="flex gap-4 md:gap-8 lg:gap-20 mb-6 md:mb-10 flex-col md:flex-row items-center md:items-start">
             {/* Profile Picture */}
             <div className="flex-shrink-0">
-              <div className="w-[150px] h-[150px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[3px]">
+              <div className="w-[80px] h-[80px] md:w-[150px] md:h-[150px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px] md:p-[3px]">
                 <div className="w-full h-full rounded-full bg-white p-[3px]">
                   {profile.profilePic && profile.profilePic.startsWith('/uploads/') ? (
                     <img
@@ -155,10 +159,10 @@ const Profile = () => {
             </div>
 
             {/* Profile Info */}
-            <div className="flex-1 text-center md:text-left">
+            <div className="flex-1 text-center md:text-left w-full md:w-auto">
               {/* Username & Actions */}
-              <div className="flex flex-col md:flex-row items-center gap-4 mb-5">
-                <h1 className="text-xl font-normal">{profile.username}</h1>
+              <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-3 md:mb-5">
+                <h1 className="text-lg md:text-xl font-normal">{profile.username}</h1>
                 {isOwnProfile ? (
                   <div className="flex gap-2">
                     <button
@@ -202,7 +206,7 @@ const Profile = () => {
               </div>
 
               {/* Stats */}
-              <div className="flex justify-center md:justify-start gap-8 md:gap-10 mb-5">
+              <div className="flex justify-center md:justify-start gap-4 md:gap-8 lg:gap-10 mb-3 md:mb-5 text-sm md:text-base">
                 <div className="text-center md:text-left">
                   <span className="font-semibold">{profile.postsCount || 0}</span>{' '}
                   <span className="text-gray-600">posts</span>
@@ -241,7 +245,7 @@ const Profile = () => {
 
           {/* Tabs */}
           <div className="border-t border-gray-300">
-            <div className="flex justify-center gap-12">
+            <div className="flex justify-center gap-6 md:gap-12">
               <button
                 onClick={() => setActiveTab('posts')}
                 className={`flex items-center gap-2 py-4 text-xs font-semibold tracking-wider uppercase border-t ${
@@ -294,7 +298,7 @@ const Profile = () => {
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-1 mt-1">
+                <div className="grid grid-cols-3 gap-0.5 md:gap-1 mt-1">
                   {profilePosts.map((post) => (
                     <Link
                       key={post._id}
@@ -348,7 +352,7 @@ const Profile = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-1 mt-1">
+                <div className="grid grid-cols-3 gap-0.5 md:gap-1 mt-1">
                   {savedPosts.map((post) => (
                     <Link
                       key={post._id}

@@ -65,7 +65,7 @@ const Sidebar = ({ onCreatePost }) => {
   ]
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[245px] bg-white border-r border-[#DBDBDB] py-6 px-3 flex flex-col">
+    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-[245px] bg-white border-r border-[#DBDBDB] py-6 px-3 flex-col">
       {/* Logo */}
       <div className="px-3 mb-5">
         <img

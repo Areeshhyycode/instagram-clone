@@ -1,158 +1,226 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
+import MobileBottomNav from '../components/layout/MobileBottomNav'
 import CreatePostModal from '../components/post/CreatePostModal'
-import postService from '../services/postService'
+import userService from '../services/userService'
+import DefaultAvatar from '../components/common/DefaultAvatar'
 
 const Search = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState([])
+  const [userResults, setUserResults] = useState([])
   const [searching, setSearching] = useState(false)
-  const [hasSearched, setHasSearched] = useState(false)
   const [showCreatePost, setShowCreatePost] = useState(false)
+  const [recentSearches, setRecentSearches] = useState([])
+  const [isFocused, setIsFocused] = useState(false)
 
-  const handleSearch = async (e) => {
-    e.preventDefault()
-    if (!searchQuery.trim()) return
-
-    setSearching(true)
-    setHasSearched(true)
-    try {
-      const response = await postService.searchPosts(searchQuery)
-      setSearchResults(response.posts)
-    } catch (err) {
-      console.error('Search error:', err)
-    } finally {
-      setSearching(false)
+  // Load recent searches from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('recentSearches')
+    if (saved) {
+      setRecentSearches(JSON.parse(saved))
     }
-  }
+  }, [])
 
-  const handleHashtagSearch = async (hashtag) => {
-    setSearchQuery(hashtag)
-    setSearching(true)
-    setHasSearched(true)
-    try {
-      const response = await postService.getPostsByHashtag(hashtag.replace('#', ''))
-      setSearchResults(response.posts)
-    } catch (err) {
-      console.error('Hashtag search error:', err)
-    } finally {
-      setSearching(false)
+  // Debounced search - searches as user types
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setUserResults([])
+      return
     }
-  }
+
+    const timer = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const response = await userService.searchUsers(searchQuery)
+        setUserResults(response.users || [])
+      } catch (err) {
+        console.error('Search error:', err)
+        setUserResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 300) // 300ms debounce
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const clearSearch = () => {
     setSearchQuery('')
-    setSearchResults([])
-    setHasSearched(false)
+    setUserResults([])
+  }
+
+  const handleUserClick = (user) => {
+    // Add to recent searches
+    const updated = [user, ...recentSearches.filter(u => u._id !== user._id)].slice(0, 10)
+    setRecentSearches(updated)
+    localStorage.setItem('recentSearches', JSON.stringify(updated))
+  }
+
+  const removeFromRecent = (e, userId) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const updated = recentSearches.filter(u => u._id !== userId)
+    setRecentSearches(updated)
+    localStorage.setItem('recentSearches', JSON.stringify(updated))
+  }
+
+  const clearAllRecent = () => {
+    setRecentSearches([])
+    localStorage.removeItem('recentSearches')
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-white md:bg-[#FAFAFA] pb-[60px] md:pb-0">
       <Sidebar onCreatePost={() => setShowCreatePost(true)} />
+      <MobileBottomNav onCreatePost={() => setShowCreatePost(true)} />
 
-      <main className="ml-[245px]">
-        <div className="max-w-[935px] mx-auto px-5 py-8">
-          {/* Search Bar */}
-          <div className="mb-6">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Search posts, hashtags..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pl-10 bg-gray-100 rounded-lg focus:outline-none focus:bg-white focus:ring-1 focus:ring-gray-300"
-              />
-              <svg
-                className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      <main className="md:ml-[245px]">
+        <div className="max-w-[600px] mx-auto">
+          {/* Mobile Header with Search */}
+          <div className="sticky top-0 bg-white z-20 border-b md:border-none">
+            <div className="px-4 py-3 md:py-6">
+              <h1 className="hidden md:block text-2xl font-semibold mb-6">Search</h1>
+
+              {/* Search Input */}
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                </button>
-              )}
-            </form>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  className="w-full bg-[#EFEFEF] rounded-lg py-2 md:py-2.5 pl-10 pr-10 text-sm focus:outline-none placeholder-gray-500"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-400 rounded-full p-0.5"
+                  >
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Search Results Header */}
-          {searchResults.length > 0 && (
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold">
-                Results for "{searchQuery}" ({searchResults.length})
-              </h2>
-              <button
-                onClick={clearSearch}
-                className="text-[#0095F6] text-sm font-semibold"
-              >
-                Clear
-              </button>
-            </div>
-          )}
-
           {/* Content */}
-          {searching ? (
-            <div className="flex justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            </div>
-          ) : !hasSearched ? (
-            <div className="py-16 text-center">
-              <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <h2 className="text-xl font-semibold mb-2">Search</h2>
-              <p className="text-gray-500">Search for posts, hashtags, and more.</p>
-            </div>
-          ) : searchResults.length === 0 ? (
-            <div className="py-16 text-center">
-              <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <h2 className="text-xl font-semibold mb-2">No results found</h2>
-              <p className="text-gray-500">Try searching for something else.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-1">
-              {searchResults.map((post) => (
-                <Link
-                  key={post._id}
-                  to={`/p/${post._id}`}
-                  className="aspect-square bg-gray-100 relative group"
-                >
-                  <img
-                    src={`http://localhost:8000${post.image}`}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white font-semibold">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          <div className="px-4 md:px-0">
+            {/* Loading */}
+            {searching && (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-gray-600"></div>
+              </div>
+            )}
+
+            {/* Search Results */}
+            {!searching && searchQuery && userResults.length > 0 && (
+              <div className="py-2">
+                {userResults.map((user) => (
+                  <Link
+                    key={user._id}
+                    to={`/profile/${user.username}`}
+                    onClick={() => handleUserClick(user)}
+                    className="flex items-center gap-3 py-2 md:py-3 px-2 md:px-4 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-full overflow-hidden flex-shrink-0">
+                      {user.profilePic && user.profilePic.startsWith('/uploads/') ? (
+                        <img
+                          src={`http://localhost:8000${user.profilePic}`}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <DefaultAvatar size="lg" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm">{user.username}</p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {user.fullName || user.username}
+                        {user.followersCount > 0 && ` • ${user.followersCount} followers`}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* No Results */}
+            {!searching && searchQuery && userResults.length === 0 && (
+              <div className="py-12 text-center">
+                <p className="text-gray-500 text-sm">No results found.</p>
+              </div>
+            )}
+
+            {/* Recent Searches - Show when not searching */}
+            {!searchQuery && recentSearches.length > 0 && (
+              <div className="py-2">
+                <div className="flex items-center justify-between px-2 md:px-4 mb-2">
+                  <h2 className="font-semibold text-base">Recent</h2>
+                  <button
+                    onClick={clearAllRecent}
+                    className="text-[#0095F6] text-sm font-semibold hover:text-[#1877F2]"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                {recentSearches.map((user) => (
+                  <Link
+                    key={user._id}
+                    to={`/profile/${user.username}`}
+                    className="flex items-center gap-3 py-2 md:py-3 px-2 md:px-4 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-full overflow-hidden flex-shrink-0">
+                      {user.profilePic && user.profilePic.startsWith('/uploads/') ? (
+                        <img
+                          src={`http://localhost:8000${user.profilePic}`}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <DefaultAvatar size="lg" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm">{user.username}</p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {user.fullName || user.username}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => removeFromRecent(e, user._id)}
+                      className="p-2 text-gray-400 hover:text-gray-600"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
-                      {post.likesCount || 0}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/>
-                      </svg>
-                      {post.commentsCount || 0}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+                    </button>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State - No recent searches */}
+            {!searchQuery && recentSearches.length === 0 && (
+              <div className="py-16 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-black flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-sm">Search for people</p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 

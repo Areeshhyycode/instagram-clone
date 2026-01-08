@@ -29,8 +29,8 @@ const api = {
       body: JSON.stringify(data),
     })
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || response.statusText)
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.message || error.error || response.statusText)
     }
     return response.json()
   },
