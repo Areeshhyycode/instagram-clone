@@ -44,6 +44,11 @@ const userService = {
     return api.post(`/users/unfollow/${userId}`, {})
   },
 
+  // Follow back a user
+  followBackUser: async (userId) => {
+    return api.post(`/users/follow-back/${userId}`, {})
+  },
+
   // Get followers list
   getFollowers: async (userId) => {
     return api.get(`/users/followers/${userId}`)

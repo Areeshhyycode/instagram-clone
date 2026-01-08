@@ -37,6 +37,7 @@ router.get('/profile/username/:username', auth, async (req, res) => {
       bio: user.bio,
       fullName: user.fullName || '',
       website: user.website || '',
+      isPrivate: user.isPrivate || false,
       postsCount,
       followersCount,
       followingCount,
@@ -57,6 +58,21 @@ router.get('/posts/:username', auth, async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if profile is private and user is not following
+    const isOwnProfile = user._id.equals(req.user._id);
+    const isFollowing = user.followers.some(follower => follower && follower.equals && follower.equals(req.user._id));
+
+    if (user.isPrivate && !isOwnProfile && !isFollowing) {
+      return res.json({
+        posts: [],
+        currentPage: 1,
+        totalPages: 0,
+        totalPosts: 0,
+        isPrivate: true,
+        message: 'This account is private'
+      });
     }
 
     const page = parseInt(req.query.page) || 1;
@@ -96,15 +112,20 @@ router.get('/posts/:username', auth, async (req, res) => {
   }
 });
 
-// PUT /profile/edit - Edit current user's profile (bio, profile picture)
+// PUT /profile/edit - Edit current user's profile (bio, profile picture, privacy)
 router.put('/profile/edit', auth, upload.single('profilePic'), async (req, res) => {
   try {
-    const { bio, username } = req.body;
+    const { bio, username, isPrivate } = req.body;
     const updates = {};
 
     // Update bio if provided
     if (bio !== undefined) {
       updates.bio = bio.trim();
+    }
+
+    // Update privacy setting if provided
+    if (isPrivate !== undefined) {
+      updates.isPrivate = isPrivate === 'true' || isPrivate === true;
     }
 
     // Update username if provided
@@ -148,6 +169,7 @@ router.put('/profile/edit', auth, upload.single('profilePic'), async (req, res) 
       email: user.email,
       profilePic: user.profilePic,
       bio: user.bio,
+      isPrivate: user.isPrivate,
       postsCount,
       followersCount: user.followers.length,
       followingCount: user.following.length
@@ -195,6 +217,58 @@ router.post('/follow/:id', auth, async (req, res) => {
     res.json({
       message: `You are now following ${userToFollow.username}`,
       following: true,
+      followersCount: userToFollow.followers.length,
+      followingCount: currentUser.following.length
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// POST /follow-back/:id - Follow back a user (same as follow but semantically different)
+router.post('/follow-back/:id', auth, async (req, res) => {
+  try {
+    const userToFollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.user._id);
+
+    if (!userToFollow) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Can't follow yourself
+    if (userToFollow._id.equals(currentUser._id)) {
+      return res.status(400).json({ error: 'You cannot follow yourself' });
+    }
+
+    // Check if already following
+    if (currentUser.following.includes(userToFollow._id)) {
+      return res.status(400).json({ error: 'You are already following this user' });
+    }
+
+    // Check if this user follows you
+    const followsYou = userToFollow.following.some(id => id.equals(currentUser._id));
+
+    // Add to current user's following list
+    currentUser.following.push(userToFollow._id);
+    await currentUser.save();
+
+    // Add to target user's followers list
+    userToFollow.followers.push(currentUser._id);
+    await userToFollow.save();
+
+    // Create follow notification
+    await Notification.createNotification({
+      recipient: userToFollow._id,
+      sender: currentUser._id,
+      type: 'follow'
+    });
+
+    res.json({
+      message: followsYou
+        ? `You followed back ${userToFollow.username}`
+        : `You are now following ${userToFollow.username}`,
+      following: true,
+      followsBack: followsYou,
       followersCount: userToFollow.followers.length,
       followingCount: currentUser.following.length
     });
